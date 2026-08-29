@@ -1,11 +1,24 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import NullPool
 from app.config import settings
 
-# Create engine
+db_url = settings.DATABASE_URL
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+# SQLite uses default pooling, while PostgreSQL in serverless utilizes NullPool
+is_sqlite = db_url.startswith("sqlite")
+
+connect_args = {}
+if is_sqlite:
+    connect_args["check_same_thread"] = False
+
 engine = create_engine(
-    settings.DATABASE_URL,
-    pool_pre_ping=True
+    db_url,
+    connect_args=connect_args,
+    pool_pre_ping=True if is_sqlite else False,
+    poolclass=None if is_sqlite else NullPool
 )
 
 # Create session maker
