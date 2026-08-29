@@ -61,6 +61,8 @@ app.include_router(users_router, prefix=settings.API_V1_STR)
 app.include_router(rules_router, prefix=settings.API_V1_STR)
 app.include_router(audit_logs_router, prefix=settings.API_V1_STR)
 
+@app.get("/api", tags=["root"])
+@app.get("/api/", tags=["root"])
 @app.get("/", tags=["root"])
 def read_root():
     return {
